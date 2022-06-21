@@ -127,8 +127,8 @@ while len(dealer.hand) != 2:
 dealer_up = dealer.hand[1]
 dealer_down = dealer.hand[0]
 
-dealer.update_score
-player.update_score
+dealer.update_score()
+player1.update_score()
 
 #dealer blackjack check (face value 10 or 1)
 if dealer_up.value == 1 or dealer_up == 10:
@@ -208,5 +208,5 @@ else:
 
 #reset players
 dealer.reset()
-player1.reset
+player1.reset()
 print("Balance:", player1.balance)
