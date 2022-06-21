@@ -63,7 +63,8 @@ class player:
             total += card_score
             if soft and total + 10 <= 21:
                 total += 10
-        return total 
+        self.score = total
+        return self.score
     def reset(self):
         self.hand = []
         self.bust = False
@@ -125,9 +126,11 @@ while len(dealer.hand) != 2:
     dealer.hand.append(deck.draw())
 dealer_up = dealer.hand[1]
 dealer_down = dealer.hand[0]
-print(dealer_up.value)
 
-#blackjack check (face value 10 or 1)
+dealer.update_score
+player.update_score
+
+#dealer blackjack check (face value 10 or 1)
 if dealer_up.value == 1 or dealer_up == 10:
     #insurance check
     if dealer_up == 1:
@@ -135,11 +138,13 @@ if dealer_up.value == 1 or dealer_up == 10:
         insurance_check = input("Do you want insurance? (y/n)")
         if insurance_check == 'y':
             insurance_bet = insurance(player1)
-    dealer.blackjack = (dealer.update_score == 21)
+    dealer.blackjack = (dealer.score == 21)
     if insurance and dealer.blackjack:
         player1.balance += (insurance_bet * 2)
 
 #player blackjack check
+if player1.score == 21:
+    player1.blackjack = True
 
 #player turn loop
 while player1.stand == False and player1.blackjack == False:
@@ -149,6 +154,7 @@ while player1.stand == False and player1.blackjack == False:
     #stand
     if move == 's':
         player1.stand = True
+        continue
     #hit
     elif move == 'h':
         player1.hand.append(deck.draw())
@@ -173,14 +179,34 @@ while dealer.stand == False and dealer.blackjack == False:
             dealer.hand.append(deck.draw())
             dealer.score = dealer.update_score()
         else:
-            stand = True
+            dealer.stand = True
+            continue
     elif dealer.score > 21:
         dealer.bust = True
-        stand = True
+        dealer.stand = True
     else:
-        stand = True
+        dealer.stand = True
 
+
+#score check
+if player1.bust == True:
+    print("LOSE")
+elif dealer.bust == True:
+    print("WIN")
+else:
+    if len(player1.hand) == 5 and player1.bust == False:
+        print("WIN")
+        player1.balance += (bet * (3/2))
+    elif player1.score < dealer.score:
+        print("LOSE")
+    elif player1.score > dealer.score or dealer.bust:
+        print("WIN")
+        player1.balance += (bet * (3/2))
+    elif player1.score == dealer.score:
+        print("PUSH")
+        player1.balance += bet    
 
 #reset players
 dealer.reset()
-player1.reset()
+player1.reset
+print("Balance:", player1.balance)
