@@ -206,6 +206,7 @@ while play_hand == 'y':
         print("LOSE")
     elif dealer.bust == True:
         print("WIN")
+        player1.balance += (player1.bet * 2.5)
     else:
         if len(player1.hand) == 5 and player1.bust == False:
             print("WIN")
@@ -223,6 +224,8 @@ while play_hand == 'y':
     dealer.reset()
     player1.reset()
     print("Balance:", player1.balance)
+    
+    #balance check
     if player1.balance > 500:
         play_hand = input("Do you want to play another hand? ")
     else:
