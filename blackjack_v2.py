@@ -223,7 +223,7 @@ while play_hand == 'y':
     dealer.reset()
     player1.reset()
     print("Balance:", player1.balance)
-    if player1.balance > 0:
+    if player1.balance > 500:
         play_hand = input("Do you want to play another hand? ")
     else:
         break
