@@ -53,6 +53,8 @@ class player:
         self.stand = False
         self.blackjack = False
         self.score = 0
+        self.bet = 0
+        self.insurance_bet = 0
     def update_score(self):
         total = 0
         soft = False
@@ -71,6 +73,8 @@ class player:
         self.stand = False
         self.blackjack = False
         self.score = 0
+        self.bet = 0
+        self.insurance_bet = 0
 
 def bet(player1):
     min_bet = 500
@@ -101,8 +105,8 @@ def insurance(player1):
         except:
             print("ERROR: Input invalid")
             continue
-        if player1.balance >= bet:
-            player1.balance -= bet
+        if player1.balance >= insurance_bet:
+            player1.balance -= insurance_bet
             insurance_check = True
         else:
             print("ERROR: Not enough balance")
@@ -111,102 +115,112 @@ def insurance(player1):
 #init deck
 deck = deck(6)
 deck.shuffle()
+deck_size = len(deck.cards)
+play_hand = input("Do you want to play Blackjack? ")
 
 #init players
 player1 = player(deck, 10000)
 dealer = player(deck, 0)
 
-# #player bet
-# print("Players balance:", player1.balance)
-# bet = bet(player1)
-
-#deal cards
-while len(dealer.hand) != 2:
-    player1.hand.append(deck.draw())
-    dealer.hand.append(deck.draw())
-dealer_up = dealer.hand[1]
-dealer_down = dealer.hand[0]
-
-dealer.update_score()
-player1.update_score()
-
-#dealer blackjack check (face value 10 or 1)
-if dealer_up.value == 1 or dealer_up == 10:
-    #insurance check
-    if dealer_up == 1:
-        #offer insurance (2 to 1 side bet)
-        insurance_check = input("Do you want insurance? (y/n)")
-        if insurance_check == 'y':
-            insurance_bet = insurance(player1)
-    dealer.blackjack = (dealer.score == 21)
-    if insurance and dealer.blackjack:
-        player1.balance += (insurance_bet * 2)
-
-#player blackjack check
-if player1.score == 21:
-    player1.blackjack = True
-
-#player turn loop
-while player1.stand == False and player1.blackjack == False:
-    print("Dealers's hand:", dealer.hand[0])
-    print("Player's hand:", player1.hand)
-    move = input("Hit, Stand, Double or Split: ")
-    #stand
-    if move == 's':
-        player1.stand = True
-        continue
-    #hit
-    elif move == 'h':
-        player1.hand.append(deck.draw())
-        player1.score = player1.update_score()
-    #double
-    #elif move == 'd': 
-    #split
-    #elif move == 'sp':
+while play_hand == 'y':
+    if len(deck.cards) < (deck_size * 0.2):
+        deck = deck(6)
+        deck.shuffle()
     
-    #check if bust
-    if player1.score > 21:
-        player1.bust = True
-        print("BUST")
-        player1.stand = True
-    elif len(player1.hand) == 5 and player1.bust == False:
-        player1.stand = True
+    #player bet
+    print("Players balance:", player1.balance)
+    player1.bet = bet(player1)
 
-#dealer turn cycle
-while dealer.stand == False and dealer.blackjack == False:
-    if dealer.score <= player1.score or player1.bust == False:
-        if dealer.score < 17:
-            dealer.hand.append(deck.draw())
-            dealer.score = dealer.update_score()
-        else:
+    #deal cards
+    while len(dealer.hand) != 2:
+        player1.hand.append(deck.draw())
+        dealer.hand.append(deck.draw())
+    dealer_up = dealer.hand[1]
+    dealer_down = dealer.hand[0]
+
+    dealer.update_score()
+    player1.update_score()
+
+    #dealer blackjack check (face value 10 or 1)
+    if dealer_up.value == 1 or dealer_up.value == 10:
+        #insurance check
+        if dealer_up == 1:
+            #offer insurance (2 to 1 side bet)
+            insurance_check = input("Do you want insurance? (y/n)")
+            if insurance_check == 'y':
+                player1.insurance_bet = insurance(player1)
+        dealer.blackjack = (dealer.score == 21)
+        if insurance and dealer.blackjack:
+            player1.balance += (player1.insurance_bet * 3)
+
+    #player blackjack check
+    if player1.score == 21:
+        player1.blackjack = True
+
+    #player turn loop
+    while player1.stand == False and player1.blackjack == False:
+        print("Dealers's hand:", dealer.hand[0])
+        print("Player's hand:", player1.hand)
+        move = input("Hit, Stand, Double or Split: ")
+        #stand
+        if move == 's':
+            player1.stand = True
+            continue
+        #hit
+        elif move == 'h':
+            player1.hand.append(deck.draw())
+            player1.score = player1.update_score()
+        ##double
+        #elif move == 'd': 
+        ##split
+        #elif move == 'sp':
+        
+        #check if bust
+        if player1.score > 21:
+            player1.bust = True
+            print("BUST")
+            player1.stand = True
+        elif len(player1.hand) == 5 and player1.bust == False:
+            player1.stand = True
+
+    #dealer turn cycle
+    while dealer.stand == False and dealer.blackjack == False:
+        if player1.bust:
             dealer.stand = True
             continue
-    elif dealer.score > 21:
-        dealer.bust = True
-        dealer.stand = True
-    else:
-        dealer.stand = True
+        if dealer.score <= player1.score:
+            if dealer.score < 17:
+                dealer.hand.append(deck.draw())
+                dealer.score = dealer.update_score()
+            else:
+                dealer.stand = True
+                continue
+        elif dealer.score > 21:
+            dealer.bust = True
+            dealer.stand = True
+        else:
+            dealer.stand = True
 
-
-#score check
-if player1.bust == True:
-    print("LOSE")
-elif dealer.bust == True:
-    print("WIN")
-else:
-    if len(player1.hand) == 5 and player1.bust == False:
-        print("WIN")
-        player1.balance += (bet * (3/2))
-    elif player1.score < dealer.score:
+    #score check
+    if player1.bust == True:
         print("LOSE")
-    elif player1.score > dealer.score or dealer.bust:
+    elif dealer.bust == True:
         print("WIN")
-        player1.balance += (bet * (3/2))
-    elif player1.score == dealer.score:
-        print("PUSH")
-        player1.balance += bet    
+    else:
+        if len(player1.hand) == 5 and player1.bust == False:
+            print("WIN")
+            player1.balance += (player1.bet * 2.5)
+        elif player1.score < dealer.score:
+            print("LOSE")
+        elif player1.score > dealer.score or dealer.bust:
+            print("WIN")
+            player1.balance += (player1.bet * 2.5)
+        elif player1.score == dealer.score:
+            print("PUSH")
+            player1.balance += player1.bet    
 
-#reset players
-dealer.reset()
-player1.reset()
-print("Balance:", player1.balance)
+    #reset players
+    dealer.reset()
+    player1.reset()
+    print("Balance:", player1.balance)
+    play_hand = input("Do you want to play another hand? ")
