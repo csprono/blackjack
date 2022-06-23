@@ -46,7 +46,7 @@ class deck:
         return dealt_card
 
 class player:
-    def __init__(self, deck, balance):
+    def __init__(self, balance):
         self.balance = balance
         self.hand = []
         self.bust = False
@@ -76,6 +76,7 @@ class player:
         self.bet = 0
         self.insurance_bet = 0
 
+#creates normal bet
 def bet(player1):
     min_bet = 500
     bet = 0
@@ -96,6 +97,7 @@ def bet(player1):
             print(f"ERROR: Min bet is {min_bet}")
     return bet
 
+#creates insurance bet
 def insurance(player1):
     insurance_bet = 0
     insurance_check = True
@@ -112,6 +114,10 @@ def insurance(player1):
             print("ERROR: Not enough balance")
     return insurance_bet
 
+#prints game state
+def update_game(player1, dealer):
+    print()
+
 #init deck
 deck = deck(6)
 deck.shuffle()
@@ -119,8 +125,8 @@ deck_size = len(deck.cards)
 play_hand = input("Do you want to play Blackjack? ")
 
 #init players
-player1 = player(deck, 10000)
-dealer = player(deck, 0)
+player1 = player(10000)
+dealer = player(0)
 
 while play_hand == 'y':
     if len(deck.cards) < (deck_size * 0.2):
@@ -161,7 +167,7 @@ while play_hand == 'y':
     while player1.stand == False and player1.blackjack == False:
         print("Dealers's hand:", dealer.hand[0])
         print("Player's hand:", player1.hand)
-        move = input("Hit, Stand, Double or Split: ")
+        move = input("Hit, Stand, Double or SPlit: ")
         #stand
         if move == 's':
             player1.stand = True
@@ -170,8 +176,13 @@ while play_hand == 'y':
         elif move == 'h':
             player1.hand.append(deck.draw())
             player1.score = player1.update_score()
-        ##double
-        #elif move == 'd': 
+        #double
+        elif move == 'd': #need to check when can double
+            player1.balance -= player1.bet
+            player1.bet *= 2 
+            player1.hand.append(deck.draw())
+            player1.stand = True
+            continue
         ##split
         #elif move == 'sp':
         

@@ -1,2 +1,2 @@
 # blackjack
-Blackjack in python
+Blackjack in python (WIP)
