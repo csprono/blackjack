@@ -52,14 +52,15 @@ class player:
         self.bust = False
         self.stand = False
         self.blackjack = False
-        self.score = 0
-        self.bet = 0
+        self.split = False
+        self.score = []
+        self.bet = []
         self.insurance_bet = 0
     def update_score(self):
         total = 0
         soft = False
-        for card in self.hand:
-            card_score = card.calc_score()
+        for c in self.hand:
+            card_score = c.calc_score()
             if card_score == 1:
                 soft = True    
             total += card_score
@@ -72,8 +73,8 @@ class player:
         self.bust = False
         self.stand = False
         self.blackjack = False
-        self.score = 0
-        self.bet = 0
+        self.score = []
+        self.bet = []
         self.insurance_bet = 0
 
 #creates normal bet
@@ -131,12 +132,14 @@ while play_hand == 'y':
     
     #player bet
     print("Players balance:", player1.balance)
-    player1.bet = bet(player1)
-
+    player1.bet.append(bet(player1))
+    
     #deal cards
+    hand_temp = []
     while len(dealer.hand) != 2:
-        player1.hand.append(deck.draw())
+        hand_temp.append(deck.draw())
         dealer.hand.append(deck.draw())
+    player1.hand.append(hand_temp)
     dealer_up = dealer.hand[1]
     dealer_down = dealer.hand[0]
 
@@ -155,40 +158,49 @@ while play_hand == 'y':
         if insurance and dealer.blackjack:
             player1.balance += (player1.insurance_bet * 3)
 
-    #player blackjack check
+    #player blackjack check, split check, double check
     if player1.score == 21:
         player1.blackjack = True
+    if player1.hand[0] == player1.hand[1]:
+        player1.split = True
+    #doulbe
 
     #player turn loop
-    while player1.stand == False and player1.blackjack == False:
-        print("Dealers's hand:", dealer.hand[0])
-        print("Player's hand:", player1.hand)
-        move = input("Hit, Stand, Double or SPlit: ")
-        #stand
-        if move == 's':
-            player1.stand = True
-            continue
-        #hit
-        elif move == 'h':
-            player1.hand.append(deck.draw())
-            player1.score = player1.update_score()
-        #double
-        elif move == 'd': #need to check when can double
-            player1.balance -= player1.bet
-            player1.bet *= 2 
-            player1.hand.append(deck.draw())
-            player1.stand = True
-            continue
-        # #split
-        # elif move == 'sp':
-        #check if bust
-        if player1.score > 21:
-            player1.bust = True
-            print("BUST")
-            player1.stand = True
-        elif len(player1.hand) == 5 and player1.bust == False:
-            player1.stand = True
-
+    for hand in player1.hand:
+        while player1.stand == False and player1.blackjack == False:
+            print("Dealers's hand:", dealer.hand[0])
+            print("Player's hand:", player1.hand)
+            move = input("Hit, Stand, Double or SPlit: ")
+            #stand
+            if move == 's':
+                player1.stand = True
+                continue
+            #hit
+            elif move == 'h':
+                player1.hand.append(deck.draw())
+                player1.score = player1.update_score()
+            #double
+            elif move == 'd': #need to check when can double
+                player1.balance -= player1.bet
+                player1.bet *= 2 
+                player1.hand.append(deck.draw())
+                player1.stand = True
+                continue
+            #split
+            elif move == 'sp' and player1.split:
+                player1.hand.append(player.hand[0])
+                player1.hand.append(player.hand[1])
+                player1.hand.pop(0)
+                player1.hand.pop(0)
+            #check if bust
+            if player1.score > 21:
+                player1.bust = True
+                print("BUST")
+                player1.stand = True
+            elif len(player1.hand) == 5 and player1.bust == False:
+                player1.stand = True
+        player1.stand = False
+        
     #dealer turn cycle
     while dealer.stand == False and dealer.blackjack == False:
         if player1.bust:
